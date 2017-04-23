@@ -50,7 +50,7 @@ pResult = pVec0 - pVec1
 void Vector2DSub(Vector2D *pResult, Vector2D *pVec0, Vector2D *pVec1)
 {
 	pResult->x = pVec0->x - pVec1->x;
-	pResult->y = pVec1->y - pVec1->y;
+	pResult->y = pVec0->y - pVec1->y;
 }
 
 // ---------------------------------------------------------------------------
