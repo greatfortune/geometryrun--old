@@ -524,7 +524,7 @@ void Update1(void)
 			// 缩放矩阵
 			Matrix2DScale(&scale, pInst->scale, pInst->scale);
 			// 旋转矩阵
-			Matrix2DRotDeg(&rot, pInst->dirCurr);
+			Matrix2DRotRad(&rot, pInst->dirCurr);
 			// 平移矩阵
 			Matrix2DTranslate(&trans, pInst->posCurr.x, pInst->posCurr.y);
 			// 以正确的顺序连乘以上3个矩阵形成2维变换矩阵
