@@ -53,7 +53,7 @@ typedef struct
 	Vector2				posCurr;	// 当前位置
 	Vector2				velCurr;	// 当前速度
 	float				dirCurr;	// 当前方向
-	AEMtx33				transform;	// 变换矩阵：每一帧都需要为每一个对象计算
+	Matrix2D			transform;	// 变换矩阵：每一帧都需要为每一个对象计算
 	Property			properties[MAXPROPERTIES]; // 该对象的属性
 	int					propertyCount;			   // 该对象属性的个数
 }GameObj;
@@ -111,7 +111,7 @@ int ListLength(GameObjList L);
 
 int BaseListLength(GameObjBaseList L);
 
-GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
+GameObj* CreateGameObj(unsigned long theType, float scale, Vector2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
 
 Status CreateGameObjBase(unsigned long theType, AEGfxVertexList* theMesh, GameObjBaseList L);
 
