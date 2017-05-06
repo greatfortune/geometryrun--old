@@ -513,11 +513,6 @@ void Free1(void)
 void Unload1(void)
 {
 	int i = 0;
-
-	//// 卸载对象形状定义资源，使用函数：AEGfxMeshFree
-	//for (i = 0; i < GAME_OBJ_BASE_NUM_MAX; i++)
-	//{
-	//	GameObjBase* pGamObjBase = sGameObjBaseList + i;
-	//	AEGfxMeshFree(pGamObjBase->pMesh);
-	//}
+	GameObjList tlist;
+	DestroyGameObjBaseList(theBaseList);
 }
