@@ -1,8 +1,8 @@
 /* Project:		GeometryRun
    File Name:	GameObjectManager.h
-   Author:		»Æ¼ÎÎ¬
+   Author:		é»„å˜‰ç»´
    Date:
-   Purpose:		ÓÎÏ·¶ÔÏó¹ÜÀí */
+   Purpose:		æ¸¸æˆå¯¹è±¡ç®¡ç† */
 
 #ifndef _GameObjectManager
 #define _GameObjectManager
@@ -37,25 +37,25 @@ enum objType
 	boss
 };
 
-// ÓÎÏ·¶ÔÏó»ùÀà/½á¹¹
+// æ¸¸æˆå¯¹è±¡åŸºç±»/ç»“æ„
 typedef struct
 {
-	unsigned long		type;		// ÓÎÏ·¶ÔÏóÀàĞÍ
-	AEGfxVertexList*	pMesh;		// ĞÎ×´
+	unsigned long		type;		// æ¸¸æˆå¯¹è±¡ç±»å‹
+	AEGfxVertexList*	pMesh;		// å½¢çŠ¶
 }GameObjBase;
 
-// ÓÎÏ·¶ÔÏóÀà/½á¹¹
+// æ¸¸æˆå¯¹è±¡ç±»/ç»“æ„
 typedef struct
 {
-	GameObjBase*		pObject;	// Ö¸Ïò»ùÀà£¨Ô­Ê¼ĞÎ×´ºÍÀàĞÍ£©
-	unsigned long		flag;		// »î¶¯±êÖ¾
-	float				scale;		// ³ß´ç
-	AEVec2				posCurr;	// µ±Ç°Î»ÖÃ
-	AEVec2				velCurr;	// µ±Ç°ËÙ¶È
-	float				dirCurr;	// µ±Ç°·½Ïò
-	AEMtx33				transform;	// ±ä»»¾ØÕó£ºÃ¿Ò»Ö¡¶¼ĞèÒªÎªÃ¿Ò»¸ö¶ÔÏó¼ÆËã
-	Property			properties[MAXPROPERTIES]; // ¸Ã¶ÔÏóµÄÊôĞÔ
-	int					propertyCount;			   // ¸Ã¶ÔÏóÊôĞÔµÄ¸öÊı
+	GameObjBase*		pObject;	// æŒ‡å‘åŸºç±»ï¼ˆåŸå§‹å½¢çŠ¶å’Œç±»å‹ï¼‰
+	unsigned long		flag;		// æ´»åŠ¨æ ‡å¿—
+	float				scale;		// å°ºå¯¸
+	Vector2				posCurr;	// å½“å‰ä½ç½®
+	Vector2				velCurr;	// å½“å‰é€Ÿåº¦
+	float				dirCurr;	// å½“å‰æ–¹å‘
+	AEMtx33				transform;	// å˜æ¢çŸ©é˜µï¼šæ¯ä¸€å¸§éƒ½éœ€è¦ä¸ºæ¯ä¸€ä¸ªå¯¹è±¡è®¡ç®—
+	Property			properties[MAXPROPERTIES]; // è¯¥å¯¹è±¡çš„å±æ€§
+	int					propertyCount;			   // è¯¥å¯¹è±¡å±æ€§çš„ä¸ªæ•°
 }GameObj;
 
 typedef struct INSNODE
@@ -88,7 +88,7 @@ typedef struct
 }*GameObjBaseList;
 
 
-// ÓÎÏ·¶ÔÏóÁ´±í
+// æ¸¸æˆå¯¹è±¡é“¾è¡¨
 static GameObjBaseList theBaseList;
 
 Status InitialGameObjList(GameObjList *L);
@@ -111,7 +111,7 @@ int ListLength(GameObjList L);
 
 int BaseListLength(GameObjBaseList L);
 
-GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, AEVec2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
+GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
 
 Status CreateGameObjBase(unsigned long theType, AEGfxVertexList* theMesh, GameObjBaseList L);
 
