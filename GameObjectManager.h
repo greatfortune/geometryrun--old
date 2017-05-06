@@ -1,13 +1,12 @@
 /* Project:		GeometryRun
-   File Name:	GameObjectManager.h
-   Author:		黄嘉维
-   Date:
-   Purpose:		游戏对象管理 */
+File Name:	GameObjectManager.h
+Author:		黄嘉维
+Date:
+Purpose:		游戏对象管理 */
 
 #ifndef _GameObjectManager
 #define _GameObjectManager
 
-#define ERROR -1
 #define OK 1
 #define FLAG_ACTIVE 1
 #define FLAG_INACTIVE 0
@@ -18,6 +17,9 @@
 #include "System.h"
 #include "AEEngine.h"
 #include "GameObjectManager.h"
+#include "Vector2D.h"
+#include "Matrix2D.h"
+#include "Math2D.h"
 
 typedef int Status;
 
@@ -50,8 +52,8 @@ typedef struct
 	GameObjBase*		pObject;	// 指向基类（原始形状和类型）
 	unsigned long		flag;		// 活动标志
 	float				scale;		// 尺寸
-	Vector2				posCurr;	// 当前位置
-	Vector2				velCurr;	// 当前速度
+	Vector2D			posCurr;	// 当前位置
+	Vector2D			velCurr;	// 当前速度
 	float				dirCurr;	// 当前方向
 	Matrix2D			transform;	// 变换矩阵：每一帧都需要为每一个对象计算
 	Property			properties[MAXPROPERTIES]; // 该对象的属性
@@ -111,7 +113,7 @@ int ListLength(GameObjList L);
 
 int BaseListLength(GameObjBaseList L);
 
-GameObj* CreateGameObj(unsigned long theType, float scale, Vector2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
+GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2D Vel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties);
 
 Status CreateGameObjBase(unsigned long theType, AEGfxVertexList* theMesh, GameObjBaseList L);
 

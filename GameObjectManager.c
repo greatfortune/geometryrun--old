@@ -10,7 +10,7 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L);
 
 Status InitialGameObjList(GameObjList *L)
 {
-	*L = (GameObjList *)malloc(sizeof(GameObjList*));
+	*L = (GameObjList )malloc(sizeof(GameObjList*));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (insNode *)malloc(sizeof(insNode));
@@ -27,7 +27,7 @@ Status InitialGameObjList(GameObjList *L)
 
 Status InitialGameObjBaseList(GameObjBaseList *L)
 {
-	*L = (GameObjBaseList *)malloc(sizeof(GameObjBaseList*));
+	*L = (GameObjBaseList )malloc(sizeof(GameObjBaseList*));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (baseNode *)malloc(sizeof(baseNode));
@@ -172,12 +172,11 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L)
 }
 
 //创建新实例对象
-GameObj* CreateGameObj(unsigned long theType, float scale, Vector2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties)
+GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2D Vel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties)
 {
-	Vector2 zero = { 0.0f, 0.0f };
 	baseNode *pBaseNode = GetBaseNodeWithType(theType, L);
 
-	insNode *pt1 = pBaseNode->gameobj_list->head, *pt2 = pt1->next, *pInstNode = NULL;
+	insNode *pt1, *pt2, *pInstNode = NULL;
 	int flag = 0, i;
 
 	// 找非活动对象的位置
@@ -196,17 +195,22 @@ GameObj* CreateGameObj(unsigned long theType, float scale, Vector2* pPos, Vector
 		pInstNode = (insNode *)malloc(sizeof(insNode));
 		AE_ASSERT_MESG(pInstNode, "Fail to malloc");
 	}
+	pt1 = pBaseNode->gameobj_list->head;
+	pt2 = pt1->next;
 	pt1->next = pInstNode;
 	pInstNode->next = pt2;
+	pInstNode->pre = pt1;
+	pt2->pre = pInstNode;
 	pInstNode->gameobj.pObject = &(pBaseNode->gameobj_base);
 	pInstNode->gameobj.flag = FLAG_ACTIVE;
 	pInstNode->gameobj.scale = scale;
-	pInstNode->gameobj.posCurr = pPos ? *pPos : zero;
-	pInstNode->gameobj.velCurr = pVel ? *pVel : zero;
+	pInstNode->gameobj.posCurr = Pos;
+	pInstNode->gameobj.velCurr = Vel;
 	pInstNode->gameobj.dirCurr = dir;
 	pInstNode->gameobj.propertyCount = thePropertyCount;
 	for (i = 0; i < thePropertyCount; i++)
 		pInstNode->gameobj.properties[i] = theProperties[i];
+	pBaseNode->gameobj_list->count++;
 	// 返回新创建的对象实例
 	return &(pInstNode->gameobj);
 }
@@ -219,11 +223,14 @@ Status CreateGameObjBase(unsigned long theType, AEGfxVertexList* theMesh, GameOb
 	AE_ASSERT_MESG(pBaseNode, "Fail to malloc");
 
 	pt1->next = pBaseNode;
+	pBaseNode->pre = pt1;
 	pBaseNode->next = pt2;
+	pt2->pre = pBaseNode;
+	InitialGameObjList(&(pBaseNode->gameobj_list));
 
 	pBaseNode->gameobj_base.type = theType;
 	pBaseNode->gameobj_base.pMesh = theMesh;
-
+	L->count++;
 	return OK;
 }
 

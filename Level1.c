@@ -26,8 +26,6 @@
 
 #define BULLET_SPEED				100.0f		// 子弹沿当前方向的速度 (m/s)
 
-#define FLAG_ACTIVE					0x00000001  // 活动对象标志
-
 
 // 飞船对象：因为是Player，所以单独声明，方便程序设计
 static GameObj* spShip;
@@ -41,6 +39,7 @@ static unsigned long	sScore;
 // 只允许一个巡航导弹生成，因此设置一个生成标志
 int flag_missile = 0;
 static int missile_target = -1;  // 导弹目标在对象列表中的下标
+Vector2D zero = { 0.0f, 0.0f };
 
 //------------------------------------------------------------------------------
 // Private Function Declarations:
@@ -132,6 +131,7 @@ void Load1(void)
 
 void Ini1(void)
 {
+	
 	GameObj* pObj;
 	int i;
 	
@@ -141,13 +141,13 @@ void Ini1(void)
 
 	// 对象实例化：游戏开始只有飞船和小行星需要实例化
 	// 飞船对象实例化
-	spShip = CreateGameObj(TYPE_SHIP, SHIP_SIZE, 0, 0, 0,theBaseList,0, NULL);
+	spShip = CreateGameObj(TYPE_SHIP, SHIP_SIZE, zero, zero, 0, theBaseList, 0, NULL);
 	AE_ASSERT(spShip);
 	// 小行星对象实例化 并 初始化
 	for ( i = 0; i < ASTEROID_NUM; i++)
 	{
 		// 实例化
-		pObj = CreateGameObj(TYPE_ASTEROID, 1.0f, 0, 0, 0, theBaseList, 0, NULL);
+		pObj = CreateGameObj(TYPE_ASTEROID, 1.0f, zero, zero, 0, theBaseList, 0, NULL);
 		AE_ASSERT(pObj);
 
 		// 初始化: 坐标位置 朝向和尺寸大小
@@ -226,9 +226,9 @@ void Update1(void)
 	// 飞船移动
 	if (AEInputCheckCurr(VK_UP))
 	{
-		Vector2 added;
-		Vector2Set(&added, cosf(spShip->dirCurr), sinf(spShip->dirCurr));
-		Vector2Add(&spShip->posCurr, &spShip->posCurr, &added);
+		Vector2D added;
+		Vector2DSet(&added, cosf(spShip->dirCurr), sinf(spShip->dirCurr));
+		Vector2DAdd(&spShip->posCurr, &spShip->posCurr, &added);
 
 		// 加速运动，所以要更新速度
 		spShip->velCurr.x += SHIP_ACCEL_FORWARD * (float)(frameTime);
@@ -240,9 +240,9 @@ void Update1(void)
 
 	if (AEInputCheckCurr(VK_DOWN))
 	{
-		Vector2 added;
-		Vector2Set(&added, -cosf(spShip->dirCurr), -sinf(spShip->dirCurr));
-		Vector2Add(&spShip->posCurr, &spShip->posCurr, &added);
+		Vector2D added;
+		Vector2DSet(&added, -cosf(spShip->dirCurr), -sinf(spShip->dirCurr));
+		Vector2DAdd(&spShip->posCurr, &spShip->posCurr, &added);
 
 		// 速度更新
 		spShip->velCurr.x += SHIP_ACCEL_BACKWARD * (float)(frameTime);
@@ -273,7 +273,7 @@ void Update1(void)
 		GameObj* pBullet;
 
 		// create a bullet
-		pBullet = CreateGameObj(TYPE_BULLET, 3.0f, 0, 0, 0.0f, theBaseList, 0, NULL);
+		pBullet = CreateGameObj(TYPE_BULLET, 3.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
 		AE_ASSERT(pBullet);
 		pBullet->posCurr = spShip->posCurr;
 		pBullet->dirCurr = spShip->dirCurr;
@@ -288,7 +288,7 @@ void Update1(void)
 		if (!flag_missile)
 		{
 			// 创建导弹对象
-			spMissile = CreateGameObj(TYPE_MISSILE, 10.0f, 0, 0, 0.0f, theBaseList, 0, NULL);
+			spMissile = CreateGameObj(TYPE_MISSILE, 10.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
 			AE_ASSERT(spMissile);
 			spMissile->posCurr = spShip->posCurr;
 			spMissile->dirCurr = spShip->dirCurr;
@@ -306,7 +306,7 @@ void Update1(void)
 		for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
-			Vector2 added;
+			Vector2D added;
 
 			// 遇到非活动对象，不处理
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
@@ -315,22 +315,22 @@ void Update1(void)
 			// 更新小行星位置
 			if (pInst->pObject->type == TYPE_ASTEROID)
 			{
-				Vector2Set(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2DSet(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 
 			// 更新子弹位置
 			if (pInst->pObject->type == TYPE_BULLET)
 			{
-				Vector2Set(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2DSet(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 
 			// 更新导弹位置
 			if (pInst->pObject->type == TYPE_MISSILE)
 			{
-				Vector2Set(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2DSet(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 		}
 	}
@@ -383,7 +383,7 @@ void Update1(void)
 				GameObj* pTarget;
 				int j;
 				float angle;
-				Vector2 newv;
+				Vector2D newv;
 
 				//if ( missile_target == -1 )
 				//{
@@ -524,9 +524,9 @@ void Update1(void)
 			// 缩放矩阵
 			Matrix2DScale(&scale, pInst->scale, pInst->scale);
 			// 旋转矩阵
-			Matrix2DRot(&rot, pInst->dirCurr);
+			Matrix2DRotDeg(&rot, pInst->dirCurr);
 			// 平移矩阵
-			Matrix2DTrans(&trans, pInst->posCurr.x, pInst->posCurr.y);
+			Matrix2DTranslate(&trans, pInst->posCurr.x, pInst->posCurr.y);
 			// 以正确的顺序连乘以上3个矩阵形成2维变换矩阵
 			Matrix2DConcat(&(pInst->transform), &trans, &rot);
 			Matrix2DConcat(&(pInst->transform), &(pInst->transform), &scale);
