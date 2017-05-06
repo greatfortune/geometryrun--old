@@ -172,9 +172,9 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L)
 }
 
 //创建新实例对象
-GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, AEVec2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties)
+GameObj* CreateGameObj(unsigned long theType, float scale, Vector2* pPos, Vector2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties)
 {
-	AEVec2 zero = { 0.0f, 0.0f };
+	Vector2 zero = { 0.0f, 0.0f };
 	baseNode *pBaseNode = GetBaseNodeWithType(theType, L);
 
 	insNode *pt1 = pBaseNode->gameobj_list->head, *pt2 = pt1->next, *pInstNode = NULL;
