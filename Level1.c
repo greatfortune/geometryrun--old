@@ -1,8 +1,8 @@
 /* Project:		GProj_Asteroid
    File Name:	Level1.c
-   Author:		Áõ·¼
+   Author:		åˆ˜èŠ³
    Date:		
-   Purpose:		¹Ø¿¨1  */
+   Purpose:		å…³å¡1  */
 
 #include <stdio.h>
 #include "GameStateList.h"
@@ -16,36 +16,36 @@
 // Private Consts:
 //------------------------------------------------------------------------------
 
-#define SHIP_INITIAL_NUM			3		// ·É´¬µÄlivesÊıÄ¿
-#define ASTEROID_NUM				3		// Ğ¡ĞĞĞÇÊıÄ¿
-#define SHIP_SIZE					30.0f	// ·É´¬³ß´ç
-#define SHIP_ACCEL_FORWARD			50.0f	// ·É´¬Ç°Ïò¼ÓËÙ¶È(m/s^2)
-#define SHIP_ACCEL_BACKWARD			-100.0f	// ·É´¬ºóÏò¼ÓËÙ¶È(m/s^2)
-#define SHIP_ROT_SPEED				(2.0f * PI)	// ·É´¬Ğı×ªËÙ¶È(degree/second)
-#define HOMING_MISSILE_ROT_SPEED	(PI / 4.0f)	// µ¼µ¯Ğı×ªËÙ¶È(degree/second)
+#define SHIP_INITIAL_NUM			3		// é£èˆ¹çš„livesæ•°ç›®
+#define ASTEROID_NUM				3		// å°è¡Œæ˜Ÿæ•°ç›®
+#define SHIP_SIZE					30.0f	// é£èˆ¹å°ºå¯¸
+#define SHIP_ACCEL_FORWARD			50.0f	// é£èˆ¹å‰å‘åŠ é€Ÿåº¦(m/s^2)
+#define SHIP_ACCEL_BACKWARD			-100.0f	// é£èˆ¹åå‘åŠ é€Ÿåº¦(m/s^2)
+#define SHIP_ROT_SPEED				(2.0f * PI)	// é£èˆ¹æ—‹è½¬é€Ÿåº¦(degree/second)
+#define HOMING_MISSILE_ROT_SPEED	(PI / 4.0f)	// å¯¼å¼¹æ—‹è½¬é€Ÿåº¦(degree/second)
 
-#define BULLET_SPEED				100.0f		// ×Óµ¯ÑØµ±Ç°·½ÏòµÄËÙ¶È (m/s)
+#define BULLET_SPEED				100.0f		// å­å¼¹æ²¿å½“å‰æ–¹å‘çš„é€Ÿåº¦ (m/s)
 
-#define FLAG_ACTIVE					0x00000001  // »î¶¯¶ÔÏó±êÖ¾
+#define FLAG_ACTIVE					0x00000001  // æ´»åŠ¨å¯¹è±¡æ ‡å¿—
 
 
-// ·É´¬¶ÔÏó£ºÒòÎªÊÇPlayer£¬ËùÒÔµ¥¶ÀÉùÃ÷£¬·½±ã³ÌĞòÉè¼Æ
+// é£èˆ¹å¯¹è±¡ï¼šå› ä¸ºæ˜¯Playerï¼Œæ‰€ä»¥å•ç‹¬å£°æ˜ï¼Œæ–¹ä¾¿ç¨‹åºè®¾è®¡
 static GameObj* spShip;
 
-// Ê£ÓàµÄ·É´¬lives (lives 0 = game over)
+// å‰©ä½™çš„é£èˆ¹lives (lives 0 = game over)
 static long	sShipLives;	
 
-// the score = »÷»ÙµÄĞ¡ĞĞĞÇasteroid¸öÊı
+// the score = å‡»æ¯çš„å°è¡Œæ˜Ÿasteroidä¸ªæ•°
 static unsigned long	sScore;	
 
-// Ö»ÔÊĞíÒ»¸öÑ²º½µ¼µ¯Éú³É£¬Òò´ËÉèÖÃÒ»¸öÉú³É±êÖ¾
+// åªå…è®¸ä¸€ä¸ªå·¡èˆªå¯¼å¼¹ç”Ÿæˆï¼Œå› æ­¤è®¾ç½®ä¸€ä¸ªç”Ÿæˆæ ‡å¿—
 int flag_missile = 0;
-static int missile_target = -1;  // µ¼µ¯Ä¿±êÔÚ¶ÔÏóÁĞ±íÖĞµÄÏÂ±ê
+static int missile_target = -1;  // å¯¼å¼¹ç›®æ ‡åœ¨å¯¹è±¡åˆ—è¡¨ä¸­çš„ä¸‹æ ‡
 
 //------------------------------------------------------------------------------
 // Private Function Declarations:
 //------------------------------------------------------------------------------
-// ´´½¨/É¾³ıÓÎÏ·¶ÔÏó
+// åˆ›å»º/åˆ é™¤æ¸¸æˆå¯¹è±¡
 
 //------------------------------------------------------------------------------
 // Public Functions:
@@ -55,15 +55,15 @@ void Load1(void)
 {
 	GameObjBase* pObjBase;
 	theBaseList = NULL;
-	// ³õÊ¼»¯ÓÎÏ·¶ÔÏó»ùÀàµÄÊµÀıÁĞ±í
+	// åˆå§‹åŒ–æ¸¸æˆå¯¹è±¡åŸºç±»çš„å®ä¾‹åˆ—è¡¨
 	InitialGameObjBaseList(&theBaseList);
 
-	// ³õÊ¼»¯ÓÎÏ·¶ÔÏóÀàµÄÊµÀıÁĞ±í
+	// åˆå§‹åŒ–æ¸¸æˆå¯¹è±¡ç±»çš„å®ä¾‹åˆ—è¡¨
 
 
-	// ´´½¨»ùÀàµÄÊµÀı	
+	// åˆ›å»ºåŸºç±»çš„å®ä¾‹	
 	// =====================
-	// ·É´¬
+	// é£èˆ¹
 	// =====================
 	AEGfxMeshStart();
 	AEGfxTriAdd(
@@ -73,7 +73,7 @@ void Load1(void)
 	CreateGameObjBase(TYPE_SHIP, AEGfxMeshEnd(), theBaseList);
 	
 	// =======================
-	// ×Óµ¯£º³ß´çºÜĞ¡£¬¼ò»¯³ÉÈı½ÇĞÎ¶¨Òå
+	// å­å¼¹ï¼šå°ºå¯¸å¾ˆå°ï¼Œç®€åŒ–æˆä¸‰è§’å½¢å®šä¹‰
 	// =======================
 
 	AEGfxMeshStart();
@@ -84,7 +84,7 @@ void Load1(void)
 	CreateGameObjBase(TYPE_BULLET, AEGfxMeshEnd(), theBaseList);
 
 	// =========================
-	// Ğ¡ĞĞĞÇ£ºÓÃÁù¸öÈı½ÇĞÎÆ´³ÉÒ»¸ö¡°Ô²ĞÎ¡±
+	// å°è¡Œæ˜Ÿï¼šç”¨å…­ä¸ªä¸‰è§’å½¢æ‹¼æˆä¸€ä¸ªâ€œåœ†å½¢â€
 	// =========================
 
 	AEGfxMeshStart();
@@ -115,7 +115,7 @@ void Load1(void)
 
 	CreateGameObjBase(TYPE_ASTEROID, AEGfxMeshEnd(), theBaseList);
 	// ========================
-	// µ¼µ¯£ºÁ½¸öÈı½ÇĞÎÆ´½ÓµÄÁâĞÎ
+	// å¯¼å¼¹ï¼šä¸¤ä¸ªä¸‰è§’å½¢æ‹¼æ¥çš„è±å½¢
 	// ========================
 
 	AEGfxMeshStart();
@@ -135,22 +135,22 @@ void Ini1(void)
 	GameObj* pObj;
 	int i;
 	
-	// Îª¿ªÊ¼»­¶ÔÏó×ö×¼±¸
+	// ä¸ºå¼€å§‹ç”»å¯¹è±¡åšå‡†å¤‡
 	AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-	// ¶ÔÏóÊµÀı»¯£ºÓÎÏ·¿ªÊ¼Ö»ÓĞ·É´¬ºÍĞ¡ĞĞĞÇĞèÒªÊµÀı»¯
-	// ·É´¬¶ÔÏóÊµÀı»¯
+	// å¯¹è±¡å®ä¾‹åŒ–ï¼šæ¸¸æˆå¼€å§‹åªæœ‰é£èˆ¹å’Œå°è¡Œæ˜Ÿéœ€è¦å®ä¾‹åŒ–
+	// é£èˆ¹å¯¹è±¡å®ä¾‹åŒ–
 	spShip = CreateGameObj(TYPE_SHIP, SHIP_SIZE, 0, 0, 0,theBaseList,0, NULL);
 	AE_ASSERT(spShip);
-	// Ğ¡ĞĞĞÇ¶ÔÏóÊµÀı»¯ ²¢ ³õÊ¼»¯
+	// å°è¡Œæ˜Ÿå¯¹è±¡å®ä¾‹åŒ– å¹¶ åˆå§‹åŒ–
 	for ( i = 0; i < ASTEROID_NUM; i++)
 	{
-		// ÊµÀı»¯
+		// å®ä¾‹åŒ–
 		pObj = CreateGameObj(TYPE_ASTEROID, 1.0f, 0, 0, 0, theBaseList, 0, NULL);
 		AE_ASSERT(pObj);
 
-		// ³õÊ¼»¯: ×ø±êÎ»ÖÃ ³¯ÏòºÍ³ß´ç´óĞ¡
+		// åˆå§‹åŒ–: åæ ‡ä½ç½® æœå‘å’Œå°ºå¯¸å¤§å°
 		switch (i)
 		{
 			case 0: 
@@ -166,17 +166,17 @@ void Ini1(void)
 				pObj->posCurr.y = 100.0f;
 				break;
 		}
-		// ³¯Ïò
+		// æœå‘
 		pObj->dirCurr = acosf( pObj->posCurr.x / ((float)sqrt(pObj->posCurr.x*pObj->posCurr.x + pObj->posCurr.y * pObj->posCurr.y)) ) - PI;
 
 		pObj->scale = (i+1) * 10.0f;		
 	}
 
-	// ·ÖÊı¼°·É´¬ÊıÄ¿³õÊ¼»¯
+	// åˆ†æ•°åŠé£èˆ¹æ•°ç›®åˆå§‹åŒ–
 	sScore = 0;
 	sShipLives = SHIP_INITIAL_NUM;
 
-	// Î´Éú³Éµ¼µ¯
+	// æœªç”Ÿæˆå¯¼å¼¹
 	flag_missile = 0;
 }
 
@@ -190,7 +190,7 @@ void Update1(void)
 	double frameTime;
 
 	// ==========================================================================================
-	// »ñÈ¡´°¿ÚËÄÌõ±ßµÄ×ø±ê£¬µ±´°¿Ú·¢ÉúÒÆ¶¯»òËõ·Å£¬ÒÔÏÂÖµ»á·¢Éú±ä»¯
+	// è·å–çª—å£å››æ¡è¾¹çš„åæ ‡ï¼Œå½“çª—å£å‘ç”Ÿç§»åŠ¨æˆ–ç¼©æ”¾ï¼Œä»¥ä¸‹å€¼ä¼šå‘ç”Ÿå˜åŒ–
 	// ==========================================================================================
 	winMaxX = AEGfxGetWinMaxX();
 	winMaxY = AEGfxGetWinMaxY();
@@ -198,15 +198,15 @@ void Update1(void)
 	winMinY = AEGfxGetWinMinY();
 
 	// ======================
-	// Ö¡Ê±¼ä£ºUnityÖĞµÄdt
+	// å¸§æ—¶é—´ï¼šUnityä¸­çš„dt
 	// ======================
 	frameTime = AEFrameRateControllerGetFrameTime();
 
 	// =========================
-	// ÓÎÏ·Âß¼­ÏìÓ¦ÊäÈë
+	// æ¸¸æˆé€»è¾‘å“åº”è¾“å…¥
 	// =========================
 	
-	// ×´Ì¬ÇĞ»»
+	// çŠ¶æ€åˆ‡æ¢
 	if(AEInputCheckTriggered('R'))
 	{
 		Next = GS_Restart;
@@ -223,51 +223,51 @@ void Update1(void)
 		return;
 	}
 
-	// ·É´¬ÒÆ¶¯
+	// é£èˆ¹ç§»åŠ¨
 	if (AEInputCheckCurr(VK_UP))
 	{
-		AEVec2 added;
-		AEVec2Set(&added, cosf(spShip->dirCurr), sinf(spShip->dirCurr));
-		AEVec2Add(&spShip->posCurr, &spShip->posCurr, &added);
+		Vector2 added;
+		Vector2Set(&added, cosf(spShip->dirCurr), sinf(spShip->dirCurr));
+		Vector2Add(&spShip->posCurr, &spShip->posCurr, &added);
 
-		// ¼ÓËÙÔË¶¯£¬ËùÒÔÒª¸üĞÂËÙ¶È
+		// åŠ é€Ÿè¿åŠ¨ï¼Œæ‰€ä»¥è¦æ›´æ–°é€Ÿåº¦
 		spShip->velCurr.x += SHIP_ACCEL_FORWARD * (float)(frameTime);
 		spShip->velCurr.y += SHIP_ACCEL_FORWARD * (float)(frameTime);
-		// ¸ù¾İĞÂËÙ¶È¸üĞÂÎ»ÖÃ
+		// æ ¹æ®æ–°é€Ÿåº¦æ›´æ–°ä½ç½®
 		spShip->posCurr.x += added.x * spShip->velCurr.x * 0.95f;
 		spShip->posCurr.y += added.y * spShip->velCurr.y * 0.95f;
 	}
 
 	if (AEInputCheckCurr(VK_DOWN))
 	{
-		AEVec2 added;
-		AEVec2Set(&added, -cosf(spShip->dirCurr), -sinf(spShip->dirCurr));
-		AEVec2Add(&spShip->posCurr, &spShip->posCurr, &added);
+		Vector2 added;
+		Vector2Set(&added, -cosf(spShip->dirCurr), -sinf(spShip->dirCurr));
+		Vector2Add(&spShip->posCurr, &spShip->posCurr, &added);
 
-		// ËÙ¶È¸üĞÂ
+		// é€Ÿåº¦æ›´æ–°
 		spShip->velCurr.x += SHIP_ACCEL_BACKWARD * (float)(frameTime);
 		spShip->velCurr.y += SHIP_ACCEL_BACKWARD * (float)(frameTime);
 
-		// Î»ÖÃ¸üĞÂ
+		// ä½ç½®æ›´æ–°
 		spShip->posCurr.x += added.x * spShip->velCurr.x * 0.95f;
 		spShip->posCurr.y += added.y * spShip->velCurr.y * 0.95f;
 	}
 
 	if (AEInputCheckCurr(VK_LEFT))
 	{
-		// ÄæÊ±ÕëĞı×ª
+		// é€†æ—¶é’ˆæ—‹è½¬
 		spShip->dirCurr += SHIP_ROT_SPEED * (float)(frameTime);
 		spShip->dirCurr =  AEWrap(spShip->dirCurr, -PI, PI);
 	}
 
 	if (AEInputCheckCurr(VK_RIGHT))
 	{
-		// Ë³Ê±ÕëĞı×ª
+		// é¡ºæ—¶é’ˆæ—‹è½¬
 		spShip->dirCurr -= SHIP_ROT_SPEED * (float)(frameTime);
 		spShip->dirCurr =  AEWrap(spShip->dirCurr, -PI, PI);
 	}
 
-	// ¿Õ¸ñ¼üÉä»÷(´´½¨Ò»¸ö×Óµ¯¶ÔÏó)
+	// ç©ºæ ¼é”®å°„å‡»(åˆ›å»ºä¸€ä¸ªå­å¼¹å¯¹è±¡)
 	if (AEInputCheckTriggered(VK_SPACE))
 	{
 		GameObj* pBullet;
@@ -279,15 +279,15 @@ void Update1(void)
 		pBullet->dirCurr = spShip->dirCurr;
 	}
 
-	// M¼ü·¢Éäµ¼µ¯
+	// Mé”®å‘å°„å¯¼å¼¹
 	if (AEInputCheckTriggered('M'))
 	{
 		GameObj* spMissile;
 
-		// Ö»ÔÊĞíÉú³ÉÒ»¸öµ¼µ¯
+		// åªå…è®¸ç”Ÿæˆä¸€ä¸ªå¯¼å¼¹
 		if (!flag_missile)
 		{
-			// ´´½¨µ¼µ¯¶ÔÏó
+			// åˆ›å»ºå¯¼å¼¹å¯¹è±¡
 			spMissile = CreateGameObj(TYPE_MISSILE, 10.0f, 0, 0, 0.0f, theBaseList, 0, NULL);
 			AE_ASSERT(spMissile);
 			spMissile->posCurr = spShip->posCurr;
@@ -298,7 +298,7 @@ void Update1(void)
 	}
 
 	// ==================================================
-	// ¸üĞÂËùÓĞÆäËü£¨·Çplayer¿ØÖÆ£©»î¶¯¶ÔÏóµÄ£¨Î»ÖÃµÈ£©
+	// æ›´æ–°æ‰€æœ‰å…¶å®ƒï¼ˆéplayeræ§åˆ¶ï¼‰æ´»åŠ¨å¯¹è±¡çš„ï¼ˆä½ç½®ç­‰ï¼‰
 	// ==================================================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
@@ -306,41 +306,41 @@ void Update1(void)
 		for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
-			AEVec2 added;
+			Vector2 added;
 
-			// Óöµ½·Ç»î¶¯¶ÔÏó£¬²»´¦Àí
+			// é‡åˆ°éæ´»åŠ¨å¯¹è±¡ï¼Œä¸å¤„ç†
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
 				continue;
 
-			// ¸üĞÂĞ¡ĞĞĞÇÎ»ÖÃ
+			// æ›´æ–°å°è¡Œæ˜Ÿä½ç½®
 			if (pInst->pObject->type == TYPE_ASTEROID)
 			{
-				AEVec2Set(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				AEVec2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2Set(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 
-			// ¸üĞÂ×Óµ¯Î»ÖÃ
+			// æ›´æ–°å­å¼¹ä½ç½®
 			if (pInst->pObject->type == TYPE_BULLET)
 			{
-				AEVec2Set(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
-				AEVec2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2Set(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 
-			// ¸üĞÂµ¼µ¯Î»ÖÃ
+			// æ›´æ–°å¯¼å¼¹ä½ç½®
 			if (pInst->pObject->type == TYPE_MISSILE)
 			{
-				AEVec2Set(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				AEVec2Add(&pInst->posCurr, &pInst->posCurr, &added);
+				Vector2Set(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+				Vector2Add(&pInst->posCurr, &pInst->posCurr, &added);
 			}
 		}
 	}
 
 	// ===================================
-	// ÆäËü¸üĞÂ
+	// å…¶å®ƒæ›´æ–°
 	// Example:
-	//		-- ³¬³öÆÁÄ»ÔÚ¶ÔÏò³öÏÖ£¨·É´¬ Ğ¡ĞĞĞÇ£©
-	//		-- ³¬³öÆÁÄ»É¾³ı£¨×Óµ¯£©
-	//		-- µ¼µ¯£º¼ÆËãĞÂ·½Ïò
+	//		-- è¶…å‡ºå±å¹•åœ¨å¯¹å‘å‡ºç°ï¼ˆé£èˆ¹ å°è¡Œæ˜Ÿï¼‰
+	//		-- è¶…å‡ºå±å¹•åˆ é™¤ï¼ˆå­å¼¹ï¼‰
+	//		-- å¯¼å¼¹ï¼šè®¡ç®—æ–°æ–¹å‘
 	// ===================================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
@@ -349,11 +349,11 @@ void Update1(void)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
 
-			// ²»Àí»á·Ç»î¶¯¶ÔÏó
+			// ä¸ç†ä¼šéæ´»åŠ¨å¯¹è±¡
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
 				continue;
 		
-			// ·É´¬£ºWrap
+			// é£èˆ¹ï¼šWrap
 			if (pInst->pObject->type == TYPE_SHIP)
 			{
 				pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - SHIP_SIZE, winMaxX + SHIP_SIZE);
@@ -361,7 +361,7 @@ void Update1(void)
 				continue;
 			}
 
-			// Ğ¡ĞĞĞÇ£ºWrap
+			// å°è¡Œæ˜Ÿï¼šWrap
 			if (pInst->pObject->type == TYPE_ASTEROID)
 			{
 				pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - pInst->scale, winMaxX + pInst->scale);
@@ -369,7 +369,7 @@ void Update1(void)
 				continue;
 			}
 
-			// É¾³ı³¬³öÆÁÄ»±ß½çµÄ×Óµ¯
+			// åˆ é™¤è¶…å‡ºå±å¹•è¾¹ç•Œçš„å­å¼¹
 			if (pInst->pObject->type == TYPE_BULLET)
 			{
 				if ( (pInst->posCurr.x < winMinX) || (pInst->posCurr.x > winMaxX) || (pInst->posCurr.y < winMinY) || (pInst->posCurr.y > winMaxY) )
@@ -377,22 +377,22 @@ void Update1(void)
 				continue;
 			}
 
-			// Èçµ¼µ¯Ä¿±êÒÑ»÷»Ù£¬Ôò¸üĞÂµ¼µ¯·½Ïò
+			// å¦‚å¯¼å¼¹ç›®æ ‡å·²å‡»æ¯ï¼Œåˆ™æ›´æ–°å¯¼å¼¹æ–¹å‘
 			if ( pInst->pObject->type == TYPE_MISSILE )
 			{
 				GameObj* pTarget;
 				int j;
 				float angle;
-				AEVec2 newv;
+				Vector2 newv;
 
 				//if ( missile_target == -1 )
 				//{
-				//	// ËÑË÷È·¶¨ĞÂÄ¿±ê
+				//	// æœç´¢ç¡®å®šæ–°ç›®æ ‡
 				//	for (j = 0; j < GAME_OBJ_NUM_MAX; j++)
 				//	{
 				//		pTarget = sGameObjList + j;
 
-				//		// Ìø¹ı·Ç»î¶¯¶ÔÏó»ò·ÇĞ¡ĞĞĞÇ¶ÔÏó
+				//		// è·³è¿‡éæ´»åŠ¨å¯¹è±¡æˆ–éå°è¡Œæ˜Ÿå¯¹è±¡
 				//		if ((pTarget->flag & FLAG_ACTIVE) == 0 || pTarget->pObject->type != TYPE_ASTEROID)
 				//			continue;
 				//	
@@ -400,27 +400,27 @@ void Update1(void)
 				//		break;
 				//	}
 				//
-				//	// ÕÒµ½Ä¿±ê
+				//	// æ‰¾åˆ°ç›®æ ‡
 				//	if (missile_target > -1)
 				//	{
-				//		// È·¶¨·½Ïò
-				//		AEVec2Sub(&newv,&(pTarget->posCurr),&(pInst->posCurr));
+				//		// ç¡®å®šæ–¹å‘
+				//		Vector2Sub(&newv,&(pTarget->posCurr),&(pInst->posCurr));
 				//		if ( newv.x != 0)
 				//			angle = atanf(newv.y/newv.x);
 				//		else
 				//			angle = 0;
 				//
-				//		// ²îÏòÁ¿ÔÚµÚ¶ş¡¢ÈıÏóÏŞ
+				//		// å·®å‘é‡åœ¨ç¬¬äºŒã€ä¸‰è±¡é™
 				//		if ((newv.x < 0 && newv.y < 0) || (newv.x < 0 && newv.y > 0) )
 				//			angle += PI;
-				//		// ²îÏòÁ¿ÔÚµÚËÄÏóÏŞ
+				//		// å·®å‘é‡åœ¨ç¬¬å››è±¡é™
 				//		if ( newv.x > 0 && newv.y < 0)
 				//			angle = 2*PI + angle;
 
 				//		pInst->dirCurr = angle;
 				//	}
 				//	else
-				//		// Ïú»Ùµ¼µ¯
+				//		// é”€æ¯å¯¼å¼¹
 				//		pInst->flag = 0;
 				//}
 			}
@@ -428,7 +428,7 @@ void Update1(void)
 	}
 
 	// ====================
-	// Åö×²¼ì²â
+	// ç¢°æ’æ£€æµ‹
 	// ====================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
@@ -439,11 +439,11 @@ void Update1(void)
 			GameObj* pInstOther;
 			int j;
 
-			// ²»´¦Àí·Ç»î¶¯¶ÔÏó
+			// ä¸å¤„ç†éæ´»åŠ¨å¯¹è±¡
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
 				continue;
 
-			// asteroid Óë ship / bullet / missile µÄÅö×²¼ì²â
+			// asteroid ä¸ ship / bullet / missile çš„ç¢°æ’æ£€æµ‹
 			if (pInst->pObject->type == TYPE_ASTEROID)
 			{
 				for (pbasenode2 = theBaseList->head->next; pbasenode2 != theBaseList->tail; pbasenode2 = pbasenode2->next)
@@ -453,25 +453,25 @@ void Update1(void)
 					{
 						pInstOther = &(pinsnode2->gameobj);
 
-						// Ìø¹ı·Ç»î¶¯¶ÔÏóºÍĞ¡ĞĞĞÇ×ÔÉí
+						// è·³è¿‡éæ´»åŠ¨å¯¹è±¡å’Œå°è¡Œæ˜Ÿè‡ªèº«
 						if ((pInstOther->flag & FLAG_ACTIVE) == 0 || (pInstOther->pObject->type == TYPE_ASTEROID))
 							continue;
 
 						// asteroid vs. ship
 						if (pInstOther->pObject->type == TYPE_SHIP)
 						{
-							// Åö×²¼ì²â
+							// ç¢°æ’æ£€æµ‹
 							if (AETestCircleToCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
 							{
-								// ·É´¬»÷»Ù
+								// é£èˆ¹å‡»æ¯
 								sShipLives -= 1;
 
 								if (sShipLives <= 0)
-									// ÖØĞÂ¿ªÊ¼¹Ø¿¨
+									// é‡æ–°å¼€å§‹å…³å¡
 									Next = GS_Restart;
 								else
 								{
-									// ¸üĞÂÎ»ÖÃ
+									// æ›´æ–°ä½ç½®
 									pInstOther->posCurr.x = 100.0f;
 									pInstOther->posCurr.y = winMinY;
 								}
@@ -481,7 +481,7 @@ void Update1(void)
 						// asteroid vs. bullet
 						if (pInstOther->pObject->type == TYPE_BULLET)
 						{
-							// ·¢ÉúÅö×²£¬ÔòÁ½Õß¶¼Ïú»Ù
+							// å‘ç”Ÿç¢°æ’ï¼Œåˆ™ä¸¤è€…éƒ½é”€æ¯
 							if (AETestCircleToCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
 							{
 								pInstOther->flag = 0;
@@ -507,7 +507,7 @@ void Update1(void)
 		}
 	}
 	// =====================================
-	// ¼ÆËãËùÓĞ¶ÔÏóµÄ2D±ä»»¾ØÕó
+	// è®¡ç®—æ‰€æœ‰å¯¹è±¡çš„2Då˜æ¢çŸ©é˜µ
 	// =====================================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
@@ -515,21 +515,21 @@ void Update1(void)
 		for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
-			AEMtx33		 trans, rot, scale;
+			Matrix2D		 trans, rot, scale;
 
-			// ²»´¦Àí·Ç»î¶¯¶ÔÏó
+			// ä¸å¤„ç†éæ´»åŠ¨å¯¹è±¡
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
 				continue;
 
-			// Ëõ·Å¾ØÕó
-			AEMtx33Scale(&scale, pInst->scale, pInst->scale);
-			// Ğı×ª¾ØÕó
-			AEMtx33Rot(&rot, pInst->dirCurr);
-			// Æ½ÒÆ¾ØÕó
-			AEMtx33Trans(&trans, pInst->posCurr.x, pInst->posCurr.y);
-			// ÒÔÕıÈ·µÄË³ĞòÁ¬³ËÒÔÉÏ3¸ö¾ØÕóĞÎ³É2Î¬±ä»»¾ØÕó
-			AEMtx33Concat(&(pInst->transform), &trans, &rot);
-			AEMtx33Concat(&(pInst->transform), &(pInst->transform), &scale);
+			// ç¼©æ”¾çŸ©é˜µ
+			Matrix2DScale(&scale, pInst->scale, pInst->scale);
+			// æ—‹è½¬çŸ©é˜µ
+			Matrix2DRot(&rot, pInst->dirCurr);
+			// å¹³ç§»çŸ©é˜µ
+			Matrix2DTrans(&trans, pInst->posCurr.x, pInst->posCurr.y);
+			// ä»¥æ­£ç¡®çš„é¡ºåºè¿ä¹˜ä»¥ä¸Š3ä¸ªçŸ©é˜µå½¢æˆ2ç»´å˜æ¢çŸ©é˜µ
+			Matrix2DConcat(&(pInst->transform), &trans, &rot);
+			Matrix2DConcat(&(pInst->transform), &(pInst->transform), &scale);
 		}
 	}
 }
@@ -547,7 +547,7 @@ void Draw1(void)
 	AEGfxTextureSet(NULL, 0, 0);
 	AEGfxSetTintColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	// Öğ¸ö»æÖÆ¶ÔÏóÁĞ±íÖĞµÄËùÓĞ¶ÔÏó
+	// é€ä¸ªç»˜åˆ¶å¯¹è±¡åˆ—è¡¨ä¸­çš„æ‰€æœ‰å¯¹è±¡
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
 		tlist = pbasenode->gameobj_list;
@@ -555,17 +555,17 @@ void Draw1(void)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
 
-			// Ìø¹ı·Ç»î¶¯¶ÔÏó
+			// è·³è¿‡éæ´»åŠ¨å¯¹è±¡
 			if ((pInst->flag & FLAG_ACTIVE) == 0)
 				continue;
 
-			// ÉèÖÃ»æÖÆÄ£Ê½(Color or texture)
+			// è®¾ç½®ç»˜åˆ¶æ¨¡å¼(Color or texture)
 			AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
-			// ÉèÖÃËùÓĞ²ÎÊı(Color blend, textures, etc..)
+			// è®¾ç½®æ‰€æœ‰å‚æ•°(Color blend, textures, etc..)
 			AEGfxSetBlendMode(AE_GFX_RM_COLOR);
-			// ÉèÖÃ¶ÔÏóµÄ2D±ä»»¾ØÕó£¬Ê¹ÓÃº¯Êı£ºAEGfxSetTransform
+			// è®¾ç½®å¯¹è±¡çš„2Då˜æ¢çŸ©é˜µï¼Œä½¿ç”¨å‡½æ•°ï¼šAEGfxSetTransform
 			AEGfxSetTransform(pInst->transform.m);
-			// »æÖÆµ±Ç°¶ÔÏó£¬Ê¹ÓÃº¯Êı£ºAEGfxMeshDraw
+			// ç»˜åˆ¶å½“å‰å¯¹è±¡ï¼Œä½¿ç”¨å‡½æ•°ï¼šAEGfxMeshDraw
 			AEGfxMeshDraw(pInst->pObject->pMesh, AE_GFX_MDM_TRIANGLES);
 		}
 	}
@@ -578,7 +578,7 @@ void Free1(void)
 	insNode *pinsnode;
 	GameObjList tlist;
 
-	// Ê¹ÓÃº¯ÊıgameObjDestroyÉ¾³ıÁĞ±íÖĞµÄ¶ÔÏó
+	// ä½¿ç”¨å‡½æ•°gameObjDestroyåˆ é™¤åˆ—è¡¨ä¸­çš„å¯¹è±¡
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
 		tlist = pbasenode->gameobj_list;
@@ -594,7 +594,7 @@ void Unload1(void)
 {
 	int i = 0;
 
-	//// Ğ¶ÔØ¶ÔÏóĞÎ×´¶¨Òå×ÊÔ´£¬Ê¹ÓÃº¯Êı£ºAEGfxMeshFree
+	//// å¸è½½å¯¹è±¡å½¢çŠ¶å®šä¹‰èµ„æºï¼Œä½¿ç”¨å‡½æ•°ï¼šAEGfxMeshFree
 	//for (i = 0; i < GAME_OBJ_BASE_NUM_MAX; i++)
 	//{
 	//	GameObjBase* pGamObjBase = sGameObjBaseList + i;
