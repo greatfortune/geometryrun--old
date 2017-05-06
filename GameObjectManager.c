@@ -1,8 +1,8 @@
 /* Project:		GeometryRun
 File Name:	GameObjectManager.c
-Author:		»Æ¼ÎÎ¬
+Author:		é»„å˜‰ç»´
 Date:
-Purpose:		ÓÎÏ·¶ÔÏó¹ÜÀí */
+Purpose:		æ¸¸æˆå¯¹è±¡ç®¡ç† */
 
 #include "GameObjectManager.h"
 
@@ -129,12 +129,12 @@ int BaseListLength(GameObjBaseList L)
 Status GameObjDelete(GameObj* theGameObj)
 {
 	AE_ASSERT_MESG(theGameObj->flag, "Trying to delete a inactive gameobject");
-	theGameObj->flag = FLAG_ACTIVE;
+	theGameObj->flag = FLAG_INACTIVE;
 
 	return OK;
 }
 
-//±éÀúº¯Êý£¬¿ÉÄÜÎÞÓÃ
+//éåŽ†å‡½æ•°ï¼Œå¯èƒ½æ— ç”¨
 Status ListTraverse(GameObjList L, void(*visit)())
 {
 	insNode *pt = L->head->next;
@@ -146,7 +146,7 @@ Status ListTraverse(GameObjList L, void(*visit)())
 	return OK;
 }
 
-//±éÀúº¯Êý£¬¿ÉÄÜÎÞÓÃ
+//éåŽ†å‡½æ•°ï¼Œå¯èƒ½æ— ç”¨
 Status BaseListTraverse(GameObjBaseList L, void(*visit)())
 {
 	baseNode *pt = L->head->next;
@@ -171,7 +171,7 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L)
 	}
 }
 
-//´´½¨ÐÂÊµÀý¶ÔÏó
+//åˆ›å»ºæ–°å®žä¾‹å¯¹è±¡
 GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, AEVec2* pVel, float dir, GameObjBaseList L, int thePropertyCount, Property* theProperties)
 {
 	AEVec2 zero = { 0.0f, 0.0f };
@@ -180,7 +180,7 @@ GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, AEVec2*
 	insNode *pt1 = pBaseNode->gameobj_list->head, *pt2 = pt1->next, *pInstNode = NULL;
 	int flag = 0, i;
 
-	// ÕÒ·Ç»î¶¯¶ÔÏóµÄÎ»ÖÃ
+	// æ‰¾éžæ´»åŠ¨å¯¹è±¡çš„ä½ç½®
 	for (pt1 = pBaseNode->gameobj_list->head->next; pt1 != pBaseNode->gameobj_list->tail; pt1 = pt1->next)
 	{
 		if (pt1->gameobj.flag == FLAG_INACTIVE)
@@ -207,11 +207,11 @@ GameObj* CreateGameObj(unsigned long theType, float scale, AEVec2* pPos, AEVec2*
 	pInstNode->gameobj.propertyCount = thePropertyCount;
 	for (i = 0; i < thePropertyCount; i++)
 		pInstNode->gameobj.properties[i] = theProperties[i];
-	// ·µ»ØÐÂ´´½¨µÄ¶ÔÏóÊµÀý
+	// è¿”å›žæ–°åˆ›å»ºçš„å¯¹è±¡å®žä¾‹
 	return &(pInstNode->gameobj);
 }
 
-//´´½¨ÐÂ»ùÀà
+//åˆ›å»ºæ–°åŸºç±»
 Status CreateGameObjBase(unsigned long theType, AEGfxVertexList* theMesh, GameObjBaseList L)
 {
 	baseNode *pBaseNode = (baseNode *)malloc(sizeof(baseNode));
