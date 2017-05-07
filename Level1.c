@@ -181,13 +181,7 @@ void Free1(void)
 
 void Unload1(void)
 {
-	baseNode* pbaseNode = theBaseList->head;
-	insNode* pinsNode;
-	while (pbaseNode != theBaseList->tail) {
-		DestroyGameObjList(&(pbaseNode->gameobj_list));
-		AEGfxMeshFree(pbaseNode->gameobj_base.pMesh);
-		pbaseNode = pbaseNode->next;
-	}
+
 	DestroyGameObjBaseList(theBaseList);
 
 }
