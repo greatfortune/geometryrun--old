@@ -10,7 +10,7 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L);
 
 Status InitialGameObjList(GameObjList *L)
 {
-	*L = (GameObjList )malloc(sizeof(GameObjList));
+	*L = (GameObjList)malloc(sizeof(GameObjNode));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (insNode *)malloc(sizeof(insNode));
@@ -27,7 +27,7 @@ Status InitialGameObjList(GameObjList *L)
 
 Status InitialGameObjBaseList(GameObjBaseList *L)
 {
-	*L = (GameObjBaseList )malloc(sizeof(GameObjBaseList));
+	*L = (GameObjBaseList )malloc(sizeof(GameObjBaseNode));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (baseNode *)malloc(sizeof(baseNode));
