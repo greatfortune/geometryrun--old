@@ -62,9 +62,12 @@ Status DestroyGameObjBaseList(GameObjBaseList *L)
 	while (pt2 != (*L)->tail)
 	{
 		pt2 = pt1->next;
-		DestroyGameObjList(pt1->gameobj_list);
-		// 卸载对象形状定义资源，使用函数：AEGfxMeshFree
-		AEGfxMeshFree(pt1->gameobj_base.pMesh);
+		if ((pt1 != (*L)->head) && (pt1 != (*L)->tail))
+		{
+			DestroyGameObjList(&(pt1->gameobj_list));
+			// 卸载对象形状定义资源，使用函数：AEGfxMeshFree
+			AEGfxMeshFree(pt1->gameobj_base.pMesh);
+		}
 		free(pt1);
 		pt1 = pt2;
 	}
