@@ -34,6 +34,7 @@ typedef struct
 enum objType
 {
 	player = 0,
+	background,
 	monster,
 	block,
 	boss
