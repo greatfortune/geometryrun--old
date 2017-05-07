@@ -33,11 +33,11 @@ typedef struct
 
 enum objType
 {
-	player = 0,
-	background,
-	monster,
-	block,
-	boss
+	TYPE_PLAYER = 0,
+	TYPE_BACKGROUND,
+	TYPE_MONSTER,
+	TYPE_BLOCK,
+	TYPE_BOSS
 };
 
 // 游戏对象基类/结构
