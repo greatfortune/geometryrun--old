@@ -512,7 +512,5 @@ void Free1(void)
 
 void Unload1(void)
 {
-	int i = 0;
-	GameObjList tlist;
 	DestroyGameObjBaseList(theBaseList);
 }
