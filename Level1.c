@@ -1,6 +1,6 @@
 /* Project:		GProj_Asteroid
    File Name:	Level1.c
-   Author:		刘芳
+   Author:		闷声发大财
    Date:		
    Purpose:		关卡1  */
 
@@ -9,48 +9,26 @@
 #include "System.h"
 #include "Level1.h"
 #include "AEEngine.h"
-#include "AEInput.h"
+#include "Input.h"
 #include "GameObjectManager.h"
 
 //------------------------------------------------------------------------------
 // Private Consts:
 //------------------------------------------------------------------------------
 //Player
-#define MOVE_VELOCITY_HERO 4.0f
-#define MOVE_VELOCITY_ENEMY 7.5f
-#define JUMP_VELOCITY 11.0f
-#define GRAVITY -20.0f
+#define MOVE_VELOCITY_HERO 40.0f
+#define MOVE_VELOCITY_ENEMY 75.0f
+#define JUMP_VELOCITY 50.0f
+#define GRAVITY 20.0f
 
- 
-#define SHIP_INITIAL_NUM			3		// 飞船的lives数目
-#define ASTEROID_NUM				3		// 小行星数目
-#define SHIP_SIZE					30.0f	// 飞船尺寸
-#define SHIP_ACCEL_FORWARD			50.0f	// 飞船前向加速度(m/s^2)
-#define SHIP_ACCEL_BACKWARD			-100.0f	// 飞船后向加速度(m/s^2)
-#define SHIP_ROT_SPEED				(2.0f * PI)	// 飞船旋转速度(degree/second)
-#define HOMING_MISSILE_ROT_SPEED	(PI / 4.0f)	// 导弹旋转速度(degree/second)
-
-#define BULLET_SPEED				100.0f		// 子弹沿当前方向的速度 (m/s)
-
-
-// 飞船对象：因为是Player，所以单独声明，方便程序设计
-static GameObj* spShip;
-
-// 剩余的飞船lives (lives 0 = game over)
-static long	sShipLives;	
-
-// the score = 击毁的小行星asteroid个数
-static unsigned long	sScore;	
-
-// 只允许一个巡航导弹生成，因此设置一个生成标志
-int flag_missile = 0;
-static int missile_target = -1;  // 导弹目标在对象列表中的下标
 Vector2D zero = { 0.0f, 0.0f };
 
-//------------------------------------------------------------------------------
-// Private Function Declarations:
-//------------------------------------------------------------------------------
-// 创建/删除游戏对象
+// Player对象：因为是Player，所以单独声明，方便程序设计
+static GameObj* pHero;
+
+//jumpCheck:跳跃次数，用于二级跳
+int jumpCheck = 0;
+
 
 //------------------------------------------------------------------------------
 // Public Functions:
@@ -65,125 +43,140 @@ void Load1(void)
 
 	// 初始化游戏对象类的实例列表
 
-
 	// 创建基类的实例	
-	// =====================
-	// 飞船
-	// =====================
-	AEGfxMeshStart();
-	AEGfxTriAdd(
-		-0.5f,  0.5f, 0x01FF0000, 0.0f, 0.0f, 
-		-0.5f, -0.5f, 0xFFFF0000, 0.0f, 0.0f,
-		 0.5f,  0.0f, 0xFFFFFFFF, 0.0f, 0.0f); 
-	CreateGameObjBase(TYPE_SHIP, AEGfxMeshEnd(), theBaseList);
-	
+
 	// =======================
-	// 子弹：尺寸很小，简化成三角形定义
+	// 背景(平台)：尺寸很小，简化成三角形定义
 	// =======================
 
 	AEGfxMeshStart();
 	AEGfxTriAdd(
-		-0.5f,  0.5f, 0xFFFFFFFF, 0.0f, 0.0f, 
-		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, 0.0f,
-		 0.5f,  0.0f, 0xFFFFFFFF, 0.0f, 0.0f);
-	CreateGameObjBase(TYPE_BULLET, AEGfxMeshEnd(), theBaseList);
+		-4.0f, 0.04f, COLOR_BACKGROUND, 0.0f, 0.0f,
+		-4.0f, -0.04f, COLOR_BACKGROUND, 0.0f, 0.0f,
+		4.0f, 0.04f, COLOR_BACKGROUND, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		4.0f, -0.04f, COLOR_BACKGROUND, 0.0f, 0.0f,
+		-4.0f, -0.04f, COLOR_BACKGROUND, 0.0f, 0.0f,
+		4.0f, 0.04f, COLOR_BACKGROUND, 0.0f, 0.0f);
+
+	CreateGameObjBase(TYPE_BACKGROUND, AEGfxMeshEnd(), theBaseList);
 
 	// =========================
-	// 小行星：用六个三角形拼成一个“圆形”
+	// 主角：用12个三角形拼成一个“圆形”
 	// =========================
 
 	AEGfxMeshStart();
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		0.5f,  0.0f, 0xFF0000FF, 0.0f, 0.0f,
-		0.25f, 0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		1.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.866f, 0.5f, COLOR_PLAYER, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		0.25f, 0.4f, 0xFF0000FF, 0.0f, 0.0f,
-		-0.25f, 0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.866f, 0.5f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.5f, 0.866f, COLOR_PLAYER, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		-0.5f, 0.0f, 0xFF0000FF, 0.0f, 0.0f,
-		-0.25f, 0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.5f, 0.866f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.0f, 1.0f, COLOR_PLAYER, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		0.5f,  0.0f, 0xFF0000FF, 0.0f, 0.0f,
-		0.25f, -0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.0f, 1.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.5f, 0.866f, COLOR_PLAYER, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		0.25f, -0.4f, 0xFF0000FF, 0.0f, 0.0f,
-		-0.25f, -0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.5f, 0.866f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.866f, 0.5f, COLOR_PLAYER, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		0.0f,  0.0f, 0x010000FF, 0.0f, 0.0f, 
-		-0.5f, 0.0f, 0xFF0000FF, 0.0f, 0.0f,
-		-0.25f, -0.4f, 0xFF0000FF, 0.0f, 0.0f);
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.866f, 0.5f, COLOR_PLAYER, 0.0f, 0.0f,
+		-1.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-1.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.866f, -0.5f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.866f, -0.5f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.5f, -0.866f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		-0.5f, -0.866f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.0f, -1.0f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.0f, -1.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.5f, -0.866f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.5f, -0.866f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.866f, -0.5f, COLOR_PLAYER, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		0.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f,
+		0.866f, -0.5f, COLOR_PLAYER, 0.0f, 0.0f,
+		1.0f, 0.0f, COLOR_PLAYER, 0.0f, 0.0f);
 
-	CreateGameObjBase(TYPE_ASTEROID, AEGfxMeshEnd(), theBaseList);
+	CreateGameObjBase(TYPE_PLAYER, AEGfxMeshEnd(), theBaseList);
+
 	// ========================
-	// 导弹：两个三角形拼接的菱形
+	// 障碍物：3个三角形拼接的五边形
 	// ========================
 
 	AEGfxMeshStart();
 	AEGfxTriAdd(
-		0.5f,  0.0f, 0xFFFFFF00, 0.0f, 0.0f, 
-		0.0f,  0.5f, 0xFFFFFF00, 0.0f, 0.0f,
-		0.0f, -0.5f, 0xFFFFFF00, 0.0f, 0.0f);
+		-0.7f, -0.1f, 0xFFFFFF00, 0.0f, 0.0f,
+		0.0f, 0.5f, 0xFFFFFF00, 0.0f, 0.0f,
+		0.6f, 0.4f, 0xFFFFFF00, 0.0f, 0.0f);
 	AEGfxTriAdd(
-		-0.5f,  0.0f, 0xFFFFFF00, 0.0f, 0.0f, 
-		 0.0f,   0.5f, 0xFFFFFF00, 0.0f, 0.0f,
-		 0.0f,  -0.5f, 0xFFFFFF00, 0.0f, 0.0f);
-	CreateGameObjBase(TYPE_MISSILE, AEGfxMeshEnd(), theBaseList);
+		-0.7f, -0.1f, 0xFFFFFF00, 0.0f, 0.0f,
+		0.6f, 0.4f, 0xFFFFFF00, 0.0f, 0.0f,
+		0.25f, -0.15f, 0xFFFFFF00, 0.0f, 0.0f);
+	AEGfxTriAdd(
+		-0.7f, -0.1f, 0xFFFFFF00, 0.0f, 0.0f,
+		-0.2f, -0.5f, 0xFFFFFF00, 0.0f, 0.0f,
+		0.25f, -0.15f, 0xFFFFFF00, 0.0f, 0.0f);
+	CreateGameObjBase(TYPE_BLOCK, AEGfxMeshEnd(), theBaseList);
+
 }
 
 void Ini1(void)
 {
-	
+
 	GameObj* pObj;
 	int i;
-	
+	Vector2D iniPosition_Player = {0.0f, 30.0f};
+	Vector2D iniPosition_Block[3];
+	iniPosition_Block[0].x = 70.0f;
+	iniPosition_Block[0].y = 170.0f;
+	iniPosition_Block[1].x = 120.0f;
+	iniPosition_Block[1].y = 30.0f;
+	iniPosition_Block[2].x = 40.0f;
+	iniPosition_Block[2].y = 270.0f;
+
+
 	// 为开始画对象做准备
 	AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-	// 对象实例化：游戏开始只有飞船和小行星需要实例化
-	// 飞船对象实例化
-	spShip = CreateGameObj(TYPE_SHIP, SHIP_SIZE, zero, zero, 0, theBaseList, 0, NULL);
-	AE_ASSERT(spShip);
+	// 对象实例化：
+	// 玩家对象实例化
+	pHero = CreateGameObj(TYPE_PLAYER, SIZE_HERO, iniPosition_Player, zero, 0, theBaseList, 0, NULL);
+	AE_ASSERT(pHero);
+	// 背景对象实例化
+	pObj = CreateGameObj(TYPE_BACKGROUND, SIZE_BACKGROUND, zero, zero, 0, theBaseList, 0, NULL);
+	AE_ASSERT(pHero);
 	// 小行星对象实例化 并 初始化
-	for ( i = 0; i < ASTEROID_NUM; i++)
+	for (i = 0; i < BLOCK_NUM; i++)
 	{
 		// 实例化
-		pObj = CreateGameObj(TYPE_ASTEROID, 1.0f, zero, zero, 0, theBaseList, 0, NULL);
+		pObj = CreateGameObj(TYPE_BLOCK, SIZE_BLOCK, iniPosition_Block[i], zero, 0, theBaseList, 0, NULL);
 		AE_ASSERT(pObj);
 
-		// 初始化: 坐标位置 朝向和尺寸大小
-		switch (i)
-		{
-			case 0: 
-				pObj->posCurr.x = AEGfxGetWinMaxX();
-				pObj->posCurr.y = 100.0f; 
-				break;
-			case 1:
-				pObj->posCurr.x = 100.0f; 
-				pObj->posCurr.y = AEGfxGetWinMaxY();
-				break;
-			case 2:
-				pObj->posCurr.x = AEGfxGetWinMinX();
-				pObj->posCurr.y = 100.0f;
-				break;
-		}
 		// 朝向
-		pObj->dirCurr = acosf( pObj->posCurr.x / ((float)sqrt(pObj->posCurr.x*pObj->posCurr.x + pObj->posCurr.y * pObj->posCurr.y)) ) - PI;
+		pObj->dirCurr = acosf(pObj->posCurr.x / ((float)sqrt(pObj->posCurr.x*pObj->posCurr.x + pObj->posCurr.y * pObj->posCurr.y))) - PI;
 
-		pObj->scale = (i+1) * 10.0f;		
+		pObj->scale = (i + 1) * 10.0f;
 	}
 
-	// 分数及飞船数目初始化
-	sScore = 0;
-	sShipLives = SHIP_INITIAL_NUM;
-
-	// 未生成导弹
-	flag_missile = 0;
 }
 
 void Update1(void)
@@ -211,122 +204,78 @@ void Update1(void)
 	// =========================
 	// 游戏逻辑响应输入
 	// =========================
-	
+
 	// 状态切换
-	if(AEInputCheckTriggered('R'))
+	if (KeyPressed[KeyR] == TRUE)
 	{
 		Next = GS_Restart;
 		return;
 	}
-	if(AEInputCheckTriggered(VK_ESCAPE))
+	if (KeyPressed[KeyESC] == TRUE)
 	{
 		Next = GS_Quit;
 		return;
 	}
-	if(AEInputCheckTriggered('2'))
+	if (KeyPressed[Key2] == TRUE)
 	{
 		Next = GS_L2;
 		return;
 	}
 
 	// 控制玩家player左右移动 及 跳跃(匀速)
-	if (AEInputCheckCurr(VK_RIGHT))
+	if (KeyPressed[KeyRight] == TRUE)
 	{
 		pHero->velCurr.x = MOVE_VELOCITY_HERO;
-		pHero->posCurr.x += frameTime * pHero->velCurr.x;
 	}
 	else
-		if (AEInputCheckCurr(VK_LEFT))
+		if (KeyPressed[KeyLeft] == TRUE)
 		{
 			pHero->velCurr.x = -MOVE_VELOCITY_HERO;
-			pHero->posCurr.x += frameTime * pHero->velCurr.x;
 		}
 		else
 			pHero->velCurr.x = 0.f;
-	if (AEInputCheckCurr(VK_SPACE))
+	if (KeyPressed[KeySpace] == TRUE)
 	{
-		pHero->velCurr.y = JUMP_VELOCITY;
-		pHero->posCurr.x += frameTime * pHero->velCurr.x;
-		pHero->posCurr.y += frameTime * pHero->velCurr.y;
+
+		if (jumpCheck<2)
+			pHero->velCurr.y = JUMP_VELOCITY;
+		jumpCheck++;
 	}
+	pHero->posCurr.x += frameTime * pHero->velCurr.x;
+	pHero->posCurr.y += frameTime * pHero->velCurr.y;
 	// Player跳起后的重力效应
-	pHero->velCurr.y += GRAVITY * frameTime;
-	
-	/*
-	if (AEInputCheckCurr(VK_UP))
-	{
-		Vector2D added;
-		Vector2DSet(&added, cosf(spShip->dirCurr), sinf(spShip->dirCurr));
-		Vector2DAdd(&spShip->posCurr, &spShip->posCurr, &added);
+	if (jumpCheck > 0)
+		pHero->velCurr.y -= GRAVITY * frameTime;
 
-		// 加速运动，所以要更新速度
-		spShip->velCurr.x += SHIP_ACCEL_FORWARD * (float)(frameTime);
-		spShip->velCurr.y += SHIP_ACCEL_FORWARD * (float)(frameTime);
-		// 根据新速度更新位置
-		spShip->posCurr.x += added.x * spShip->velCurr.x * 0.95f;
-		spShip->posCurr.y += added.y * spShip->velCurr.y * 0.95f;
-	}
-
-	if (AEInputCheckCurr(VK_DOWN))
-	{
-		Vector2D added;
-		Vector2DSet(&added, -cosf(spShip->dirCurr), -sinf(spShip->dirCurr));
-		Vector2DAdd(&spShip->posCurr, &spShip->posCurr, &added);
-
-		// 速度更新
-		spShip->velCurr.x += SHIP_ACCEL_BACKWARD * (float)(frameTime);
-		spShip->velCurr.y += SHIP_ACCEL_BACKWARD * (float)(frameTime);
-
-		// 位置更新
-		spShip->posCurr.x += added.x * spShip->velCurr.x * 0.95f;
-		spShip->posCurr.y += added.y * spShip->velCurr.y * 0.95f;
-	}
-
-	if (AEInputCheckCurr(VK_LEFT))
-	{
-		// 逆时针旋转
-		spShip->dirCurr += SHIP_ROT_SPEED * (float)(frameTime);
-		spShip->dirCurr =  AEWrap(spShip->dirCurr, -PI, PI);
-	}
-	
-
-	if (AEInputCheckCurr(VK_RIGHT))
-	{
-		// 顺时针旋转
-		spShip->dirCurr -= SHIP_ROT_SPEED * (float)(frameTime);
-		spShip->dirCurr =  AEWrap(spShip->dirCurr, -PI, PI);
-	}
-	*/
-	
 	/*
 	// 空格键射击(创建一个子弹对象)
 	if (AEInputCheckTriggered(VK_SPACE))
 	{
-		GameObj* pBullet;
+	GameObj* pBullet;
 
-		// create a bullet
-		pBullet = CreateGameObj(TYPE_BULLET, 3.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
-		AE_ASSERT(pBullet);
-		pBullet->posCurr = spShip->posCurr;
-		pBullet->dirCurr = spShip->dirCurr;
+	// create a bullet
+	pBullet = CreateGameObj(TYPE_BULLET, 3.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
+	AE_ASSERT(pBullet);
+	pBullet->posCurr = spShip->posCurr;
+	pBullet->dirCurr = spShip->dirCurr;
 	}
 
 	// M键发射导弹
 	if (AEInputCheckTriggered('M'))
 	{
-		GameObj* spMissile;
+	GameObj* spMissile;
 
-		// 只允许生成一个导弹
-		if (!flag_missile)
-		{
-			// 创建导弹对象
-			spMissile = CreateGameObj(TYPE_MISSILE, 10.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
-			AE_ASSERT(spMissile);
-			spMissile->posCurr = spShip->posCurr;
-			spMissile->dirCurr = spShip->dirCurr;
+	// 只允许生成一个导弹
+	if (!flag_missile)
+	{
+	// 创建导弹对象
+	spMissile = CreateGameObj(TYPE_MISSILE, 10.0f, zero, zero, 0.0f, theBaseList, 0, NULL);
+	AE_ASSERT(spMissile);
+	spMissile->posCurr = spShip->posCurr;
+	spMissile->dirCurr = spShip->dirCurr;
 
-			flag_missile = 1;
-		}
+	flag_missile = 1;
+	}
 	}
 	*/
 	/*
@@ -336,37 +285,37 @@ void Update1(void)
 	// ==================================================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
-		tlist = pbasenode->gameobj_list;
-		for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
-		{
-			GameObj* pInst = &(pinsnode->gameobj);
-			Vector2D added;
+	tlist = pbasenode->gameobj_list;
+	for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
+	{
+	GameObj* pInst = &(pinsnode->gameobj);
+	Vector2D added;
 
-			// 遇到非活动对象，不处理
-			if ((pInst->flag & FLAG_ACTIVE) == 0)
-				continue;
+	// 遇到非活动对象，不处理
+	if ((pInst->flag & FLAG_ACTIVE) == 0)
+	continue;
 
-			// 更新小行星位置
-			if (pInst->pObject->type == TYPE_ASTEROID)
-			{
-				Vector2DSet(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
-			}
+	// 更新小行星位置
+	if (pInst->pObject->type == TYPE_ASTEROID)
+	{
+	Vector2DSet(&added, 5.0f * (float)(frameTime)* cosf(pInst->dirCurr), 5.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+	Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
+	}
 
-			// 更新子弹位置
-			if (pInst->pObject->type == TYPE_BULLET)
-			{
-				Vector2DSet(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
-			}
+	// 更新子弹位置
+	if (pInst->pObject->type == TYPE_BULLET)
+	{
+	Vector2DSet(&added, BULLET_SPEED * (float)(frameTime)* cosf(pInst->dirCurr), BULLET_SPEED * (float)(frameTime)* sinf(pInst->dirCurr));
+	Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
+	}
 
-			// 更新导弹位置
-			if (pInst->pObject->type == TYPE_MISSILE)
-			{
-				Vector2DSet(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
-				Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
-			}
-		}
+	// 更新导弹位置
+	if (pInst->pObject->type == TYPE_MISSILE)
+	{
+	Vector2DSet(&added, 100.0f * (float)(frameTime)* cosf(pInst->dirCurr), 100.0f * (float)(frameTime)* sinf(pInst->dirCurr));
+	Vector2DAdd(&pInst->posCurr, &pInst->posCurr, &added);
+	}
+	}
 	}
 
 	// ===================================
@@ -378,88 +327,89 @@ void Update1(void)
 	// ===================================
 	for (pbasenode = theBaseList->head->next; pbasenode != theBaseList->tail; pbasenode = pbasenode->next)
 	{
-		tlist = pbasenode->gameobj_list;
-		for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
-		{
-			GameObj* pInst = &(pinsnode->gameobj);
+	tlist = pbasenode->gameobj_list;
+	for (pinsnode = tlist->head->next; pinsnode != tlist->tail; pinsnode = pinsnode->next)
+	{
+	GameObj* pInst = &(pinsnode->gameobj);
 
-			// 不理会非活动对象
-			if ((pInst->flag & FLAG_ACTIVE) == 0)
-				continue;
-		
-			// 飞船：Wrap
-			if (pInst->pObject->type == TYPE_SHIP)
-			{
-				pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - SHIP_SIZE, winMaxX + SHIP_SIZE);
-				pInst->posCurr.y = AEWrap(pInst->posCurr.y, winMinY - SHIP_SIZE, winMaxY + SHIP_SIZE);
-				continue;
-			}
+	// 不理会非活动对象
+	if ((pInst->flag & FLAG_ACTIVE) == 0)
+	continue;
 
-			// 小行星：Wrap
-			if (pInst->pObject->type == TYPE_ASTEROID)
-			{
-				pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - pInst->scale, winMaxX + pInst->scale);
-				pInst->posCurr.y = AEWrap(pInst->posCurr.y, winMinY - pInst->scale, winMaxY + pInst->scale);
-				continue;
-			}
-
-			// 删除超出屏幕边界的子弹
-			if (pInst->pObject->type == TYPE_BULLET)
-			{
-				if ( (pInst->posCurr.x < winMinX) || (pInst->posCurr.x > winMaxX) || (pInst->posCurr.y < winMinY) || (pInst->posCurr.y > winMaxY) )
-					pInst->flag = 0;
-				continue;
-			}
-
-			// 如导弹目标已击毁，则更新导弹方向
-			if ( pInst->pObject->type == TYPE_MISSILE )
-			{
-				GameObj* pTarget;
-				int j;
-				float angle;
-				Vector2D newv;
-
-				//if ( missile_target == -1 )
-				//{
-				//	// 搜索确定新目标
-				//	for (j = 0; j < GAME_OBJ_NUM_MAX; j++)
-				//	{
-				//		pTarget = sGameObjList + j;
-
-				//		// 跳过非活动对象或非小行星对象
-				//		if ((pTarget->flag & FLAG_ACTIVE) == 0 || pTarget->pObject->type != TYPE_ASTEROID)
-				//			continue;
-				//	
-				//		missile_target = j;
-				//		break;
-				//	}
-				//
-				//	// 找到目标
-				//	if (missile_target > -1)
-				//	{
-				//		// 确定方向
-				//		Vector2Sub(&newv,&(pTarget->posCurr),&(pInst->posCurr));
-				//		if ( newv.x != 0)
-				//			angle = atanf(newv.y/newv.x);
-				//		else
-				//			angle = 0;
-				//
-				//		// 差向量在第二、三象限
-				//		if ((newv.x < 0 && newv.y < 0) || (newv.x < 0 && newv.y > 0) )
-				//			angle += PI;
-				//		// 差向量在第四象限
-				//		if ( newv.x > 0 && newv.y < 0)
-				//			angle = 2*PI + angle;
-
-				//		pInst->dirCurr = angle;
-				//	}
-				//	else
-				//		// 销毁导弹
-				//		pInst->flag = 0;
-				//}
-			}
-		}
+	// 飞船：Wrap
+	if (pInst->pObject->type == TYPE_SHIP)
+	{
+	pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - SHIP_SIZE, winMaxX + SHIP_SIZE);
+	pInst->posCurr.y = AEWrap(pInst->posCurr.y, winMinY - SHIP_SIZE, winMaxY + SHIP_SIZE);
+	continue;
 	}
+
+	// 小行星：Wrap
+	if (pInst->pObject->type == TYPE_ASTEROID)
+	{
+	pInst->posCurr.x = AEWrap(pInst->posCurr.x, winMinX - pInst->scale, winMaxX + pInst->scale);
+	pInst->posCurr.y = AEWrap(pInst->posCurr.y, winMinY - pInst->scale, winMaxY + pInst->scale);
+	continue;
+	}
+
+	// 删除超出屏幕边界的子弹
+	if (pInst->pObject->type == TYPE_BULLET)
+	{
+	if ( (pInst->posCurr.x < winMinX) || (pInst->posCurr.x > winMaxX) || (pInst->posCurr.y < winMinY) || (pInst->posCurr.y > winMaxY) )
+	pInst->flag = 0;
+	continue;
+	}
+
+	// 如导弹目标已击毁，则更新导弹方向
+	if ( pInst->pObject->type == TYPE_MISSILE )
+	{
+	GameObj* pTarget;
+	int j;
+	float angle;
+	Vector2D newv;
+
+	//if ( missile_target == -1 )
+	//{
+	//	// 搜索确定新目标
+	//	for (j = 0; j < GAME_OBJ_NUM_MAX; j++)
+	//	{
+	//		pTarget = sGameObjList + j;
+
+	//		// 跳过非活动对象或非小行星对象
+	//		if ((pTarget->flag & FLAG_ACTIVE) == 0 || pTarget->pObject->type != TYPE_ASTEROID)
+	//			continue;
+	//
+	//		missile_target = j;
+	//		break;
+	//	}
+	//
+	//	// 找到目标
+	//	if (missile_target > -1)
+	//	{
+	//		// 确定方向
+	//		Vector2Sub(&newv,&(pTarget->posCurr),&(pInst->posCurr));
+	//		if ( newv.x != 0)
+	//			angle = atanf(newv.y/newv.x);
+	//		else
+	//			angle = 0;
+	//
+	//		// 差向量在第二、三象限
+	//		if ((newv.x < 0 && newv.y < 0) || (newv.x < 0 && newv.y > 0) )
+	//			angle += PI;
+	//		// 差向量在第四象限
+	//		if ( newv.x > 0 && newv.y < 0)
+	//			angle = 2*PI + angle;
+
+	//		pInst->dirCurr = angle;
+	//	}
+	//	else
+	//		// 销毁导弹
+	//		pInst->flag = 0;
+	//}
+	}
+	}
+	}
+	*/
 
 	// ====================
 	// 碰撞检测
@@ -471,14 +421,13 @@ void Update1(void)
 		{
 			GameObj* pInst = &(pinsnode->gameobj);
 			GameObj* pInstOther;
-			int j;
 
 			// 不处理非活动对象
-			if ((pInst->flag & FLAG_ACTIVE) == 0)
+			if (pInst->flag == FLAG_INACTIVE)
 				continue;
 
-			// asteroid 与 ship / bullet / missile 的碰撞检测
-			if (pInst->pObject->type == TYPE_ASTEROID)
+			// Player 与 background / block 的碰撞检测
+			if (pInst->pObject->type == TYPE_PLAYER)
 			{
 				for (pbasenode2 = theBaseList->head->next; pbasenode2 != theBaseList->tail; pbasenode2 = pbasenode2->next)
 				{
@@ -487,52 +436,32 @@ void Update1(void)
 					{
 						pInstOther = &(pinsnode2->gameobj);
 
-						// 跳过非活动对象和小行星自身
-						if ((pInstOther->flag & FLAG_ACTIVE) == 0 || (pInstOther->pObject->type == TYPE_ASTEROID))
+						// 跳过非活动对象和自身
+						if ((pInstOther->flag & FLAG_ACTIVE) == 0 || (pInstOther->pObject->type == TYPE_PLAYER))
 							continue;
 
-						// asteroid vs. ship
-						if (pInstOther->pObject->type == TYPE_SHIP)
+						// Player vs. Block
+						if (pInstOther->pObject->type == TYPE_BLOCK)
 						{
 							// 碰撞检测
-							if (AETestCircleToCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
+							if (StaticCircleToStaticCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
 							{
-								// 飞船击毁
-								sShipLives -= 1;
+								// 碰到BLOCK死亡
+								// 重新开始关卡
+								Next = GS_Restart;
+								continue;
+							}
+						}
 
-								if (sShipLives <= 0)
-									// 重新开始关卡
-									Next = GS_Restart;
-								else
-								{
-									// 更新位置
-									pInstOther->posCurr.x = 100.0f;
-									pInstOther->posCurr.y = winMinY;
-								}
-							}
-							continue;
-						}
-						// asteroid vs. bullet
-						if (pInstOther->pObject->type == TYPE_BULLET)
+						// Player vs. Background
+						if (pInstOther->pObject->type == TYPE_BACKGROUND)
 						{
-							// 发生碰撞，则两者都销毁
-							if (AETestCircleToCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
+							//是否在平台上
+							if ((pInst->posCurr.y - pInstOther->posCurr.y) <= (pInst->scale / 2 + pInstOther->scale / 2))
 							{
-								pInstOther->flag = 0;
-								pInst->flag = 0;
-								sScore += 100;
-							}
-							continue;
-						}
-						// asteroid vs. missile
-						if (pInstOther->pObject->type == TYPE_MISSILE)
-						{
-							// collision detection
-							if (AETestCircleToCircle(&(pInst->posCurr), pInst->scale, &(pInstOther->posCurr), pInstOther->scale))
-							{
-								pInst->flag = 0;
-								missile_target = -1;
-								sScore += 500;
+								jumpCheck = 0;
+								pInst->velCurr.y = 0;
+								pInst->posCurr.y = pInstOther->posCurr.y + pInst->scale / 2 + pInstOther->scale / 2;
 							}
 						}
 					}
@@ -540,7 +469,6 @@ void Update1(void)
 			}
 		}
 	}
-	*/
 
 	// =====================================
 	// 计算所有对象的2D变换矩阵
@@ -569,6 +497,7 @@ void Update1(void)
 		}
 	}
 }
+
 
 void Draw1(void)
 {
@@ -628,12 +557,5 @@ void Free1(void)
 
 void Unload1(void)
 {
-	int i = 0;
-
-	//// 卸载对象形状定义资源，使用函数：AEGfxMeshFree
-	//for (i = 0; i < GAME_OBJ_BASE_NUM_MAX; i++)
-	//{
-	//	GameObjBase* pGamObjBase = sGameObjBaseList + i;
-	//	AEGfxMeshFree(pGamObjBase->pMesh);
-	//}
+	DestroyGameObjBaseList(theBaseList);
 }
