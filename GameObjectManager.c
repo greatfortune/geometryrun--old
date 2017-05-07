@@ -10,7 +10,7 @@ static baseNode* GetBaseNodeWithType(unsigned long theType, GameObjBaseList L);
 
 Status InitialGameObjList(GameObjList *L)
 {
-	*L = (GameObjList )malloc(sizeof(GameObjList));
+	*L = (GameObjList )malloc(sizeof(GameObjList*));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (insNode *)malloc(sizeof(insNode));
@@ -27,7 +27,7 @@ Status InitialGameObjList(GameObjList *L)
 
 Status InitialGameObjBaseList(GameObjBaseList *L)
 {
-	*L = (GameObjBaseList )malloc(sizeof(GameObjBaseList));
+	*L = (GameObjBaseList )malloc(sizeof(GameObjBaseList*));
 	if (!*L)
 		return ERROR;
 	(*L)->head = (baseNode *)malloc(sizeof(baseNode));
@@ -63,6 +63,8 @@ Status DestroyGameObjBaseList(GameObjBaseList *L)
 	{
 		pt2 = pt1->next;
 		DestroyGameObjList(pt1->gameobj_list);
+		// 卸载对象形状定义资源，使用函数：AEGfxMeshFree
+		AEGfxMeshFree(pt1->gameobj_base.pMesh);
 		free(pt1);
 		pt1 = pt2;
 	}
