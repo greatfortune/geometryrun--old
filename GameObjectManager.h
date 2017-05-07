@@ -24,9 +24,9 @@ Purpose:		游戏对象管理 */
 typedef int Status;
 
 #define MAXPROPERTIES 5
-#define SIZE_HERO					2.0f	// 角色尺寸
+#define SIZE_HERO					20.0f	// 角色尺寸
 #define SIZE_BLOCK					1.0f	// 障碍物尺寸
-#define SIZE_BACKGROUND				10.0f	// 背景平台尺寸
+#define SIZE_BACKGROUND				100.0f	// 背景平台尺寸
 #define BLOCK_NUM 4
 #define COLOR_PLAYER 0xFAC8A9FF
 #define COLOR_BACKGROUND 0xFFFFFFFF
