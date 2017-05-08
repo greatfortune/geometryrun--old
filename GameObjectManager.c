@@ -186,7 +186,7 @@ GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2
 	int flag = 0, i;
 
 	// 找非活动对象的位置
-	for (pt1 = pBaseNode->gameobj_list->tail->pre; pt1 != pBaseNode->gameobj_list->head; pt1 = pt1->pre)
+	for (pt1 = pBaseNode->gameobj_list->head->next; pt1 != pBaseNode->gameobj_list->tail; pt1 = pt1->next)
 	{
 		if (pt1->gameobj.flag == FLAG_INACTIVE)
 		{
