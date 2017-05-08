@@ -95,8 +95,9 @@ Status ClearGameObjBaseList(GameObjBaseList L)
 	baseNode *pt1 = L->head->next, *pt2 = pt1;
 	while (pt2 != L->tail)
 	{
-		pt2 = pt1->next;		
-		DestroyGameObjList(&(pt1->gameobj_list));
+		pt2 = pt1->next;
+		if ((pt1 != L->head) && (pt1 != L->tail))
+			DestroyGameObjList(&(pt1->gameobj_list));
 		free(pt1);
 		pt1 = pt2;
 	}
@@ -131,11 +132,11 @@ int BaseListLength(GameObjBaseList L)
 	return L->count;
 }
 
-Status GameObjDelete(GameObj* theGameObj)
+Status GameObjDelete(GameObj* theGameObj, GameObjList* L)
 {
 	AE_ASSERT_MESG(theGameObj->flag, "Trying to delete a inactive gameobject");
 	theGameObj->flag = FLAG_INACTIVE;
-
+	(*L)->count--;
 	return OK;
 }
 
@@ -185,7 +186,7 @@ GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2
 	int flag = 0, i;
 
 	// 找非活动对象的位置
-	for (pt1 = pBaseNode->gameobj_list->head->next; pt1 != pBaseNode->gameobj_list->tail; pt1 = pt1->next)
+	for (pt1 = pBaseNode->gameobj_list->tail->pre; pt1 != pBaseNode->gameobj_list->head; pt1 = pt1->pre)
 	{
 		if (pt1->gameobj.flag == FLAG_INACTIVE)
 		{
@@ -197,15 +198,15 @@ GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2
 		pInstNode = pt1;
 	else
 	{
+		pt1 = pBaseNode->gameobj_list->head;
 		pInstNode = (insNode *)malloc(sizeof(insNode));
 		AE_ASSERT_MESG(pInstNode, "Fail to malloc");
+		pt2 = pt1->next;
+		pt1->next = pInstNode;
+		pInstNode->next = pt2;
+		pInstNode->pre = pt1;
+		pt2->pre = pInstNode;
 	}
-	pt1 = pBaseNode->gameobj_list->head;
-	pt2 = pt1->next;
-	pt1->next = pInstNode;
-	pInstNode->next = pt2;
-	pInstNode->pre = pt1;
-	pt2->pre = pInstNode;
 	pInstNode->gameobj.pObject = &(pBaseNode->gameobj_base);
 	pInstNode->gameobj.flag = FLAG_ACTIVE;
 	pInstNode->gameobj.scale = scale;
@@ -216,6 +217,7 @@ GameObj* CreateGameObj(unsigned long theType, float scale, Vector2D Pos, Vector2
 	for (i = 0; i < thePropertyCount; i++)
 		pInstNode->gameobj.properties[i] = theProperties[i];
 	pBaseNode->gameobj_list->count++;
+	//printf("创建对象实例：type:%d scale:%f pos:(%f, %f), vel:(%f, %f), dir:%f, propertyCount:%d", theType, scale );
 	// 返回新创建的对象实例
 	return &(pInstNode->gameobj);
 }
