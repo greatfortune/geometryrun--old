@@ -16,10 +16,10 @@
 // Private Consts:
 //------------------------------------------------------------------------------
 //Player
-#define MOVE_VELOCITY_HERO 100.0f
+#define MOVE_VELOCITY_HERO 130.0f
 #define MOVE_VELOCITY_ENEMY 75.0f
-#define JUMP_VELOCITY 50.0f
-#define GRAVITY 20.0f
+#define JUMP_VELOCITY 100.0f
+#define GRAVITY 100.0f
 
 Vector2D zero = { 0.0f, 0.0f };
 
@@ -36,8 +36,12 @@ int jumpCheck = 0;
 
 void Load1(void)
 {
+	printf("Level1: Load\n");
 	GameObjBase* pObjBase;
 	theBaseList = NULL;
+
+	// 设置调试信息
+	SetObjTypeName();
 	// 初始化游戏对象基类的实例列表
 	InitialGameObjBaseList(&theBaseList);
 
@@ -140,19 +144,20 @@ void Load1(void)
 
 void Ini1(void)
 {
-
+	printf("Level1: Ini\n");
 	GameObj* pObj;
 	int i;
 	Vector2D iniPosition_Player = {0.0f, 24.0f};
-	Vector2D iniPosition_Block[3];
+	Vector2D iniPosition_Block[BLOCK_NUM];
 	iniPosition_Block[0].x = 70.0f;
 	iniPosition_Block[0].y = 170.0f;
 	iniPosition_Block[1].x = 120.0f;
 	iniPosition_Block[1].y = 30.0f;
 	iniPosition_Block[2].x = 40.0f;
 	iniPosition_Block[2].y = 270.0f;
-
-
+	iniPosition_Block[3].x = 80.0f;
+	iniPosition_Block[3].y = 180.0f;
+	
 	// 为开始画对象做准备
 	AEGfxSetBackgroundColor(0.0f, 0.0f, 0.0f);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -497,6 +502,7 @@ void Update1(void)
 								// 重新开始关卡
 								Next = GS_Restart;
 								deathFlag = 1;
+								printf("\n Collision with the Block: Pos(%.1f, %.1f)\n Restart\n", pInstOther->posCurr.x, pInstOther->posCurr.y);
 								break;
 							}
 							continue;
@@ -586,6 +592,7 @@ void Draw1(void)
 
 void Free1(void)
 {
+	printf("Level1: free\n");
 	int i = 0;
 	baseNode *pbasenode;
 	insNode *pinsnode;
@@ -605,5 +612,6 @@ void Free1(void)
 
 void Unload1(void)
 {
+	printf("Level1: Unload\n");
 	DestroyGameObjBaseList(&theBaseList);
 }
