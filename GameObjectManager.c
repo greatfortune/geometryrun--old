@@ -96,7 +96,8 @@ Status ClearGameObjBaseList(GameObjBaseList L)
 	while (pt2 != L->tail)
 	{
 		pt2 = pt1->next;
-		DestroyGameObjList(pt1->gameobj_list);
+		if ((pt1 != L->head) && (pt1 != L->tail))
+			DestroyGameObjList(&(pt1->gameobj_list));
 		free(pt1);
 		pt1 = pt2;
 	}
