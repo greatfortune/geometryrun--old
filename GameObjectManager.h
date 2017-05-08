@@ -43,7 +43,8 @@ enum objType
 	TYPE_BACKGROUND,
 	TYPE_MONSTER,
 	TYPE_BLOCK,
-	TYPE_BOSS
+	TYPE_BOSS,
+	TYPE_COUNT
 };
 
 // 游戏对象基类/结构
@@ -99,6 +100,10 @@ typedef struct
 
 // 游戏对象链表
 static GameObjBaseList theBaseList;
+// 用于调试输出对象类型名称
+static char ObjTypeName[TYPE_COUNT][20];
+
+void SetObjTypeName();
 
 Status InitialGameObjList(GameObjList *L);
 
